@@ -1,0 +1,1 @@
+This game of Tic Tac Toe is my first program written in Ruby. I've familiarized myself a little with classes and different types of variables and their scope in this project. 
