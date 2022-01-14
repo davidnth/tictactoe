@@ -17,7 +17,11 @@ class Game
   def move
     loop do
       puts "#{@name}'s turn. Make a move."
-      player_input = gets.chomp 
+      player_input = ''
+      loop do
+        player_input = gets.chomp 
+        break if check_input(player_input)
+      end 
       move_array = player_input.slice(1, player_input.length - 2).split(',')
       move = {:row => move_array[0].to_i, :column => move_array[1].to_i}
       if @@board[move[:row]][move[:column]] != '-'
@@ -32,15 +36,14 @@ class Game
   def check_input(string)
     if string.length != 5 || !string.split(',') 
       puts 'Invalid input, please enter a position in the format \'[row,column]\'.'
-      return false
+      return #false
     end 
-    #if !string[1].to_i.between?(0,2) || !string[3].to_i.between?(0,2)
-    #  puts 'Invalid input, row and column must be between 0 and 2. Please try again.'
-    #  return false
-    end 
-    if !/0-2/.match(string[1]) || !/0-2/.match(string[3])
+    if !/[0-2]/.match(string[1]) || !/[0-2]/.match(string[3])
       puts 'Invalid input, please enter a position in the format \'[row,column]\'.'
-  end   
+      return #false 
+    end
+    return string
+  end 
 
   def grid
     Game.board.each do |k|
@@ -97,6 +100,7 @@ player_2 = Game.new(name, 'x')
 puts "#{player_1.name} plays as \'o\'. #{player_2.name} plays as \'x\'."
 puts 'Enter a position in the format [row,column] where row and column are between 0 and 2.'
 player_1.move
+player_1.grid
 
 
 
