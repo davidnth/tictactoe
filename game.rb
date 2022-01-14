@@ -50,14 +50,40 @@ class Game
       puts k.each { |v| v }.join(' ')
     end
   end
-end
 
-# prints the board
-def grid(array)
-  array.each do |k|
-    puts k.each { |v| v }.join(' ')
+  def check_rows
+    Game.board.any? do |row|
+      row.all? { |x| x == row[0] }
+    end
+  end
+  
+  def check_columns
+    Game.board.transpose.any? do |column|
+      column.all? { |x| x == column[0] }
+    end
+  end
+  
+  def check_diagonals
+    array = Game.board.flatten
+    up_down = []
+    (0..array.length - 1).step(4).each do |index|
+      up_down.push(array[index])
+    end
+    down_up = []
+    (2..6).step(2).each do |index|
+      down_up.push(array[index])
+    end
+    up_down.all? { |x| x == up_down[0]} || down_up.all? { |x| x == down_up[0]}
+  end
+  
+  def check_win
+    if check_rows || check_columns || check_diagonals 
+      puts @name 
+    end
   end
 end
+
+
 
 def check_rows
   Game.board.any? do |row|
@@ -85,7 +111,9 @@ def check_diagonals
 end
 
 def check_win
-  check_rows || check_columns || check_win
+  if check_rows || check_columns || check_diagonals 
+    p "there is a winner"
+  end 
 end
 
 puts 'Enter a name for Player 1'
@@ -103,6 +131,7 @@ player_1.move
 Game.grid 
 player_2.move
 Game.grid
+player_2.check_win
 
 
 
