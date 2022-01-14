@@ -45,7 +45,7 @@ class Game
     return string
   end 
 
-  def grid
+  def self.grid
     Game.board.each do |k|
       puts k.each { |v| v }.join(' ')
     end
@@ -100,7 +100,10 @@ player_2 = Game.new(name, 'x')
 puts "#{player_1.name} plays as \'o\'. #{player_2.name} plays as \'x\'."
 puts 'Enter a position in the format [row,column] where row and column are between 0 and 2.'
 player_1.move
-player_1.grid
+Game.grid 
+player_2.move
+Game.grid
+
 
 
 
