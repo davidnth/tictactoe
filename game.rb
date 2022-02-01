@@ -171,6 +171,14 @@ class Player
       puts k.join('|')
     end
   end
+  
+  def input
+    puts "#{@name}'s turn to make a move. Enter a number between 1-9."
+    loop do
+      number = gets.chomp
+      break if (1..9).include? number.to_i
+    end 
+  end 
 end
 
 def player_name
@@ -183,12 +191,6 @@ def player_name
   end
 end
 
-def input
-  puts "#{@name}'s turn to make a move. Enter a number between 1-9."
-  loop do
-    gets.chomp 
-  end 
-end 
 
 player_one = Player.new(player_name, 'o')
 player_two = Player.new(player_name, 'x')
