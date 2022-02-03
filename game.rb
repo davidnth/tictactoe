@@ -135,14 +135,7 @@ player_2.check_win
 
 ########## starting over 
 
-arr = Array.new(3) {Array.new(3)}
-
-def populate_board(arr)
-  i = 0
-  arr.map do |row|
-    row.map { i += 1 }
-  end
-end
+require 'pry'
 
 # Player class
 class Player
@@ -171,14 +164,33 @@ class Player
       puts k.join('|')
     end
   end
-  
+
   def input
     puts "#{@name}'s turn to make a move. Enter a number between 1-9."
     loop do
-      number = gets.chomp
-      break if (1..9).include? number.to_i
-    end 
-  end 
+      number = gets.chomp.to_i
+      break number if (1..9).include?(number) && valid_move?(number)
+
+      puts 'Move invalid. Try again.'
+    end
+  end
+
+  def valid_move?(num)
+    # return false if winner?
+    # return false if occupied? 
+    @@board.any? { |row| row.include? num }
+  end
+
+  def move
+    num = input
+    @@board = @@board.map do |row|
+      row.map do |cell|
+        @symbol if cell == num
+        cell if cell != num
+      end
+    end
+  end
+
 end
 
 def player_name
@@ -192,6 +204,7 @@ def player_name
 end
 
 
+
 player_one = Player.new(player_name, 'o')
 player_two = Player.new(player_name, 'x')
 
@@ -201,4 +214,6 @@ puts "#{player_two.name} plays as \'#{player_two.symbol}\'."
 Player.new_game
 Player.grid
 
+player_one.move
+Player.grid
 
