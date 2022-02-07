@@ -135,85 +135,105 @@ player_2.check_win
 
 ########## starting over 
 
-require 'pry'
+# game class containing the class instance variable board which will be available to players
+class Game
+  class << self
+    attr_accessor :board
+  end
+  @board = Array.new(3) { Array.new(3) }
+
+  def new_game
+    i = 1
+    Game.board.each_with_index do |row, r|
+      row.each_with_index do |column, c|
+        Game.board[r][c] = i
+        i += 1
+      end
+    end
+  end
+
+  def self.grid
+    @board.each do |k|
+      puts k.join('|')
+    end
+  end
+end
 
 # Player class
 class Player
+  #Player < Game
   attr_accessor :name, :symbol
 
-  @@board = Array.new(3) { Array.new(3) }
-
-  def self.board
-    @@board
-  end
-  
   def initialize(name, symbol)
     @name = name
     @symbol = symbol
   end
 
-  def self.new_game
-    i = 0
-    @@board = @@board.map do |row|
-      row.map { i += 1 }
-    end
-  end
-
-  def self.grid
-    Player.board.each do |k|
-      puts k.join('|')
-    end
-  end
-
-  def input
-    puts "#{@name}'s turn to make a move. Enter a number between 1-9."
-    loop do
-      number = gets.chomp.to_i
-      break number if (1..9).include?(number) && valid_move?(number)
-
-      puts 'Move invalid. Try again.'
-    end
-  end
-
-  def valid_move?(num)
-    # return false if winner?
-    # return false if occupied? 
-    @@board.any? { |row| row.include? num }
-  end
-
-  def move
-    num = input
-    @@board = @@board.map do |row|
-      row.map do |cell|
-        @symbol if cell == num
-        cell if cell != num
+  # Assigns symbol to position if position is vacant
+  def move(num)
+    Game.board.each_with_index do |row, row_index|
+      row.each_with_index do |_column, column_index|
+        Game.board[row_index][column_index] = @symbol if Game.board[row_index][column_index] == num
       end
     end
+    Game.grid
   end
 
-end
+  def check_rows
+    Game.board.each do |row|
+      break @name if row.all?(@symbol)
+    end
+    puts "#{@name} wins!"
+  end
+
+  def check_columns
+    Game.board.transpose.each do |column|
+      break @name if column.all?(@symbol)
+    end
+    puts "#{@name} wins!"
+  end
+
+  def check_win
+    return if check_rows
+    return if check_columns
+  end 
+
+
+end 
 
 def player_name
-  puts 'Enter a name'
+  puts 'Enter a name.'
   loop do
     name = gets.chomp
     break name unless name.empty?
 
-    puts 'Try again'
+    puts 'Please enter a name.'
+  end
+end
+
+# gets a number between 1-9
+def input
+  loop do
+    puts 'Enter a number between 1-9'
+    number = gets.chomp.to_i
+    break number if (1..9).include?(number)
   end
 end
 
 
 
+# creates game object
+game = Game.new
+# numbers the array
+game.new_game
+# initialises player one and two
 player_one = Player.new(player_name, 'o')
 player_two = Player.new(player_name, 'x')
 
 puts "#{player_one.name} plays as \'#{player_one.symbol}\'."
 puts "#{player_two.name} plays as \'#{player_two.symbol}\'."
 
-Player.new_game
-Player.grid
-
-player_one.move
-Player.grid
-
+player_one.move(input)
+player_one.move(input)
+player_one.move(input)
+player_one.check_rows
