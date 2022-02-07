@@ -180,10 +180,11 @@ class Player
   end
 
   def check_rows
-    Game.board.each do |row|
-      break @name if row.all?(@symbol)
+    winner = Game.board.any? do |row|
+      row.all?(@symbol)
     end
-    puts "#{@name} wins!"
+    if winner puts "#{@name}" 
+    return false 
   end
 
   def check_columns
