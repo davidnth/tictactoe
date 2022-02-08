@@ -1,140 +1,3 @@
-# a game class containing the board and players
-class Game
-  attr_reader :name, :symbol
-
-  @@board = Array.new(3) { Array.new(3) { '-' } }
-  # initialize with player names and empty board
-  def self.board
-    @@board
-  end
-  # create player
-
-  def initialize(name, symbol)
-    @name = name
-    @symbol = symbol
-  end
-
-  def move
-    loop do
-      puts "#{@name}'s turn. Make a move."
-      player_input = ''
-      loop do
-        player_input = gets.chomp 
-        break if check_input(player_input)
-      end 
-      move_array = player_input.slice(1, player_input.length - 2).split(',')
-      move = {:row => move_array[0].to_i, :column => move_array[1].to_i}
-      if @@board[move[:row]][move[:column]] != '-'
-        puts 'Invalid move, please try again.'
-      else
-        @@board[move[:row]][move[:column]] = @symbol 
-        break
-      end
-    end
-  end
-
-  def check_input(string)
-    if string.length != 5 || !string.split(',') 
-      puts 'Invalid input, please enter a position in the format \'[row,column]\'.'
-      return #false
-    end 
-    if !/[0-2]/.match(string[1]) || !/[0-2]/.match(string[3])
-      puts 'Invalid input, please enter a position in the format \'[row,column]\'.'
-      return #false 
-    end
-    return string
-  end 
-
-  def self.grid
-    Game.board.each do |k|
-      puts k.each { |v| v }.join(' ')
-    end
-  end
-
-  def check_rows
-    Game.board.any? do |row|
-      row.all? { |x| x == row[0] }
-    end
-  end
-  
-  def check_columns
-    Game.board.transpose.any? do |column|
-      column.all? { |x| x == column[0] }
-    end
-  end
-  
-  def check_diagonals
-    array = Game.board.flatten
-    up_down = []
-    (0..array.length - 1).step(4).each do |index|
-      up_down.push(array[index])
-    end
-    down_up = []
-    (2..6).step(2).each do |index|
-      down_up.push(array[index])
-    end
-    up_down.all? { |x| x == up_down[0]} || down_up.all? { |x| x == down_up[0]}
-  end
-  
-  def check_win
-    if check_rows || check_columns || check_diagonals 
-      puts @name 
-    end
-  end
-end
-
-
-
-def check_rows
-  Game.board.any? do |row|
-    row.all? { |x| x == row[0] }
-  end
-end
-
-def check_columns
-  Game.board.transpose.any? do |column|
-    column.all? { |x| x == column[0] }
-  end
-end
-
-def check_diagonals
-  array = Game.board.flatten
-  up_down = []
-  (0..array.length - 1).step(4).each do |index|
-    up_down.push(array[index])
-  end
-  down_up = []
-  (2..6).step(2).each do |index|
-    down_up.push(array[index])
-  end
-  up_down.all? { |x| x == up_down[0]} || down_up.all? { |x| x == down_up[0]}
-end
-
-def check_win
-  if check_rows || check_columns || check_diagonals 
-    p "there is a winner"
-  end 
-end
-
-puts 'Enter a name for Player 1'
-name = gets.chomp
-player_1 = Game.new(name, 'o')
-
-
-puts 'Enter a name for Player 2'
-name = gets.chomp
-player_2 = Game.new(name, 'x')
-
-puts "#{player_1.name} plays as \'o\'. #{player_2.name} plays as \'x\'."
-puts 'Enter a position in the format [row,column] where row and column are between 0 and 2.'
-player_1.move
-Game.grid 
-player_2.move
-Game.grid
-player_2.check_win
-
-########## starting over 
-
 # game class containing the class instance variable board which will be available to players
 class Game
   class << self
@@ -179,25 +42,55 @@ class Player
     Game.grid
   end
 
+  # checks horizontally for a winner 
   def check_rows
-    winner = Game.board.any? do |row|
-      row.all?(@symbol)
-    end
-    if winner puts "#{@name}" 
-    return false 
+    winner = Game.board.any? { |row| row.all?(@symbol) }
+    return @name if winner
+
+    false
+  end
+  # checks vertically for a winner
+  def check_columns
+    winner = Game.board.transpose.any? { |column| column.all?(@symbol) }
+    return @name if winner
+
+    false
   end
 
-  def check_columns
-    Game.board.transpose.each do |column|
-      break @name if column.all?(@symbol)
-    end
-    puts "#{@name} wins!"
+  # checks diagonally for a winner
+  def check_diagonals
+    right_left
+    left_right
+  end 
+
+  def left_right
+    k = Game.board.length + 1
+    v = Game.board.length - 1
+    arr = Game.board.flatten
+    left_right = []
+    arr.each_slice(k) { |n| left_right << n.first }
+    puts "#{@name} wins diagonally (left-right)" if left_right.all?(@symbol)
+    return @name if left_right.all?(@symbol)
+
+    false
   end
+  
+  def right_left
+    arr = Game.board.flatten
+    row_size = Game.board.length
+    right_left = []
+    arr.slice(1, arr.length - row_size).each_slice(row_size - 1) { |n| right_left << n.last }
+    puts "#{@name} wins diagonally (right-left)" if right_left.all?(@symbol) 
+    return @name if right_left.all?(@symbol)
+
+    false
+  end 
 
   def check_win
-    return if check_rows
-    return if check_columns
-  end 
+    puts "#{@name} wins" if check_rows
+    puts "#{@name} wins" if check_columns
+    puts "#{@name} wins" if check_diagonals
+  end
 
 
 end 
@@ -237,4 +130,4 @@ puts "#{player_two.name} plays as \'#{player_two.symbol}\'."
 player_one.move(input)
 player_one.move(input)
 player_one.move(input)
-player_one.check_rows
+player_one.check_win
