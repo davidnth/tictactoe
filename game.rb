@@ -24,7 +24,6 @@ end
 
 # Player class
 class Player
-  #Player < Game
   attr_accessor :name, :symbol
 
   def initialize(name, symbol)
@@ -42,6 +41,16 @@ class Player
     Game.grid
   end
 
+  # gets a number between 1-9
+  def input
+    puts "#{@name}'s turn to move. Enter a number between 1-9."
+    loop do
+      number = gets.to_i
+      puts 'Invalid move. Enter an unoccupied number.' unless unoccupied?(number)
+      break number if (1..9).include?(number) && unoccupied?(number)
+    end
+  end
+
   # checks horizontally for a winner 
   def check_rows
     winner = Game.board.any? { |row| row.all?(@symbol) }
@@ -49,6 +58,7 @@ class Player
 
     false
   end
+
   # checks vertically for a winner
   def check_columns
     winner = Game.board.transpose.any? { |column| column.all?(@symbol) }
@@ -59,9 +69,11 @@ class Player
 
   # checks diagonally for a winner
   def check_diagonals
-    right_left
-    left_right
-  end 
+    return @name if right_left
+    return @name if left_right
+
+    false
+  end
 
   def left_right
     k = Game.board.length + 1
@@ -69,8 +81,10 @@ class Player
     arr = Game.board.flatten
     left_right = []
     arr.each_slice(k) { |n| left_right << n.first }
-    puts "#{@name} wins diagonally (left-right)" if left_right.all?(@symbol)
-    return @name if left_right.all?(@symbol)
+    if left_right.all?(@symbol)
+      puts "#{@name} wins diagonally (left-right)" 
+      return @name
+    end
 
     false
   end
@@ -80,23 +94,25 @@ class Player
     row_size = Game.board.length
     right_left = []
     arr.slice(1, arr.length - row_size).each_slice(row_size - 1) { |n| right_left << n.last }
-    puts "#{@name} wins diagonally (right-left)" if right_left.all?(@symbol) 
-    return @name if right_left.all?(@symbol)
+    if right_left.all?(@symbol)
+      puts "#{@name} wins diagonally (right-left)"
+      return @name
+    end
 
     false
-  end 
-
-  def check_win
-    puts "#{@name} wins" if check_rows
-    puts "#{@name} wins" if check_columns
-    puts "#{@name} wins" if check_diagonals
   end
 
+  def check_win
+    if check_rows || check_columns || check_diagonals
+      puts "#{@name} wins!"
+      return @name
+    end
+    false
+  end
+end
 
-end 
-
-def player_name
-  puts 'Enter a name.'
+def player_name(num)
+  puts "Enter a name for player #{num}"
   loop do
     name = gets.chomp
     break name unless name.empty?
@@ -105,29 +121,53 @@ def player_name
   end
 end
 
-# gets a number between 1-9
-def input
+# checks position is unoccupied
+def unoccupied?(number)
+  Game.board.any? { |row| row.any? { |val| val == number } }
+end
+
+def board_full?
+  if Game.board.all? { |row| row.none? { |square| square.is_a? Integer } }
+    puts 'It\'s a draw.'
+    return true
+  end
+
+  false
+end
+
+def play_game(player_one, player_two)
   loop do
-    puts 'Enter a number between 1-9'
-    number = gets.chomp.to_i
-    break number if (1..9).include?(number)
+    player_one.move(player_one.input)
+    break if player_one.check_win || board_full?
+
+    player_two.move(player_two.input)
+    break if player_two.check_win || board_full?
   end
 end
 
-
-
+def play_again?(player_one, player_two, game)
+  loop do
+    puts 'Play again? Y/N'
+    answer = gets.chomp
+    if %w[y Y].include? answer
+      game.new_game
+      Game.grid
+      play_game(player_one, player_two)
+    end 
+    break if %w[n N].include? answer
+  end
+end
 # creates game object
 game = Game.new
 # numbers the array
 game.new_game
-# initialises player one and two
-player_one = Player.new(player_name, 'o')
-player_two = Player.new(player_name, 'x')
+
+player_one = Player.new(player_name('one'), 'o')
+player_two = Player.new(player_name('two'), 'x')
 
 puts "#{player_one.name} plays as \'#{player_one.symbol}\'."
 puts "#{player_two.name} plays as \'#{player_two.symbol}\'."
 
-player_one.move(input)
-player_one.move(input)
-player_one.move(input)
-player_one.check_win
+Game.grid
+play_game(player_one, player_two)
+play_again?(player_one, player_two, game)
