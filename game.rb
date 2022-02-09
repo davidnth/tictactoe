@@ -1,4 +1,4 @@
-# game class containing the class instance variable board which will be available to players
+# a class containing the board
 class Game
   class << self
     attr_accessor :board
@@ -22,7 +22,7 @@ class Game
   end
 end
 
-# Player class
+# Player class containing name and symbol
 class Player
   attr_accessor :name, :symbol
 
@@ -77,31 +77,25 @@ class Player
 
   def left_right
     k = Game.board.length + 1
-    v = Game.board.length - 1
     arr = Game.board.flatten
     left_right = []
     arr.each_slice(k) { |n| left_right << n.first }
-    if left_right.all?(@symbol)
-      puts "#{@name} wins diagonally (left-right)" 
-      return @name
-    end
+    return @name if left_right.all?(@symbol)
 
     false
   end
-  
+
   def right_left
     arr = Game.board.flatten
     row_size = Game.board.length
     right_left = []
     arr.slice(1, arr.length - row_size).each_slice(row_size - 1) { |n| right_left << n.last }
-    if right_left.all?(@symbol)
-      puts "#{@name} wins diagonally (right-left)"
-      return @name
-    end
+    return @name if right_left.all?(@symbol)
 
     false
   end
 
+  # checks if the player has one
   def check_win
     if check_rows || check_columns || check_diagonals
       puts "#{@name} wins!"
@@ -153,13 +147,12 @@ def play_again?(player_one, player_two, game)
       game.new_game
       Game.grid
       play_game(player_one, player_two)
-    end 
+    end
     break if %w[n N].include? answer
   end
 end
-# creates game object
+
 game = Game.new
-# numbers the array
 game.new_game
 
 player_one = Player.new(player_name('one'), 'o')
