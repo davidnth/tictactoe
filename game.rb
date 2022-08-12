@@ -95,7 +95,7 @@ class Player
     false
   end
 
-  # checks if the player has one
+  # checks if the player has won
   def check_win
     if check_rows || check_columns || check_diagonals
       puts "#{@name} wins!"
